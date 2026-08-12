@@ -1,0 +1,52 @@
+services:
+  api:
+    build: ./backend-node
+    restart: always
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: postgresql://chowk:chowk@postgres:5432/chowk?schema=public
+      JWT_ACCESS_SECRET: local-development-secret-change-me
+      MEDIA_INGEST_URL: rtmp://localhost:1935
+      MEDIA_HLS_URL: http://localhost:8888
+      MEDIA_WHIP_URL: http://localhost:8889
+    depends_on:
+      - postgres
+      - redis
+      - mediamtx
+    ports:
+      - "3000:3000"
+
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: chowk
+      POSTGRES_PASSWORD: chowk
+      POSTGRES_DB: chowk
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    restart: always
+    ports:
+      - "6379:6379"
+
+  mediamtx:
+    image: bluenviron/mediamtx:latest
+    restart: always
+    ports:
+      - "1935:1935"
+      - "8888:8888"
+      - "8889:8889"
+      - "9997:9997"
+
+volumes:
+  postgres_data:
+
+# Usage:
+# docker compose -f docker-compose.dev.yml up -d
+# The API uses PostgreSQL through DATABASE_URL in the api service.

@@ -1,0 +1,192 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum StreamStatus {
+  CREATED
+  LIVE
+  ENDED
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  userCode      String?        @unique @map("user_code")
+  name          String
+  email         String         @unique
+  passwordHash  String         @map("password_hash")
+  role          String         @default("subscriber")
+  city          String?
+  state         String?
+  isActive      Boolean        @default(true) @map("is_active")
+  streams       LiveStream[]
+  refreshTokens RefreshToken[]
+  articles      Article[]
+  bookmarks     Bookmark[]
+  likes         Like[]
+  comments      Comment[]
+  reports       Report[]
+  liveReports   LiveReport[]
+  avatarUrl     String?        @map("avatar_url")
+  bio           String?
+  preferences   Json?
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model LiveStream {
+  id            BigInt       @id @default(autoincrement())
+  title         String       @db.VarChar(255)
+  description   String?
+  streamKeyHash String       @unique @map("stream_key_hash") @db.Char(64)
+  pathName      String       @unique @map("path_name") @db.VarChar(191)
+  status        StreamStatus @default(CREATED)
+  playbackUrl   String       @map("playback_url")
+  startedById   Int          @map("started_by")
+  startedBy     User         @relation(fields: [startedById], references: [id], onDelete: Restrict)
+  startedAt     DateTime?    @map("started_at")
+  endedAt       DateTime?    @map("ended_at")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  @@index([status, createdAt])
+  @@map("live_streams")
+}
+
+model RefreshToken {
+  id        BigInt   @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  tokenHash String   @unique @map("token_hash") @db.Char(64)
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@map("refresh_tokens")
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String    @db.VarChar(191)
+  slug      String    @unique @db.VarChar(191)
+  articles  Article[]
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@map("categories")
+}
+
+model Media {
+  id        Int       @id @default(autoincrement())
+  fileName  String    @map("file_name")
+  url       String
+  mime      String?
+  size      Int?
+  articles  Article[]
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@map("media")
+}
+
+model Article {
+  id          Int        @id @default(autoincrement())
+  title       String     @db.VarChar(255)
+  slug        String     @unique @db.VarChar(255)
+  excerpt     String?
+  content     String?
+  categoryId  Int?       @map("category_id")
+  authorId    Int?       @map("author_id")
+  imageId     Int?       @map("image_id")
+  status      String     @default("draft")
+  isFeatured  Boolean    @default(false) @map("is_featured")
+  viewsCount  Int        @default(0) @map("views_count")
+  publishedAt DateTime?  @map("published_at")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+  category    Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  author      User?      @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  image       Media?     @relation(fields: [imageId], references: [id], onDelete: SetNull)
+  bookmarks   Bookmark[]
+  likes       Like[]
+  comments    Comment[]
+  reports     Report[]
+
+  @@index([status, createdAt])
+  @@index([categoryId, createdAt])
+  @@map("articles")
+}
+
+model Bookmark {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  articleId Int      @map("news_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, articleId])
+  @@map("bookmarks")
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  articleId Int      @map("news_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, articleId])
+  @@map("likes")
+}
+
+model Comment {
+  id         Int      @id @default(autoincrement())
+  articleId  Int      @map("news_id")
+  userId     Int      @map("user_id")
+  content    String
+  isApproved Boolean  @default(true) @map("is_approved")
+  likesCount Int      @default(0) @map("likes_count")
+  createdAt  DateTime @default(now()) @map("created_at")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article    Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@index([articleId, createdAt])
+  @@map("comments")
+}
+
+model Report {
+  id        Int      @id @default(autoincrement())
+  articleId Int      @map("news_id")
+  userId    Int      @map("user_id")
+  reason    String
+  details   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@map("reports")
+}
+
+model LiveReport {
+  id          BigInt   @id @default(autoincrement())
+  sequenceId  BigInt   @unique @map("sequence_id")
+  title       String?
+  body        String?
+  imageUrl    String?  @map("image_url")
+  videoUrl    String?  @map("video_url")
+  meta        Json?
+  createdById Int?     @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdBy   User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@map("live_reports")
+}

@@ -1,0 +1,14 @@
+
+Please add the official CHOWK logo file provided by the designer here as one of:
+- `chowk_hindi_final.png`
+- `chowk_hindi_final.jpg`
+- `chowk_hindi_final.jpeg`
+
+Required paths (any one accepted):
+- assets/images/chowk_hindi_final.png
+- assets/images/chowk_hindi_final.jpg
+- assets/images/chowk_hindi_final.jpeg
+
+Notes:
+- The app will prefer the image asset if present and fall back to a text-based logo if it cannot find the file.
+- If you want launcher icons updated, generate adaptive icons (foreground/background) and replace files under `android/app/src/main/res/mipmap-*/` and `mipmap-anydpi-v26`, or ask me to add `flutter_launcher_icons` config and run it after you add the logo.

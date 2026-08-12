@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  nest-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Nest dependencies
+        working-directory: backend-node
+        run: npm ci
+      - name: Generate Prisma client
+        working-directory: backend-node
+        run: npm run prisma:generate
+      - name: Build Nest API
+        working-directory: backend-node
+        run: npm run build
+      - name: Test Nest API
+        working-directory: backend-node
+        run: npm test -- --runInBand
+
+  flutter-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+      - name: Flutter version
+        run: flutter --version
+      - name: Build APK (android) placeholder
+        run: |
+          echo "To build signed APK, configure Android keystore and secrets in GitHub Actions."
+      - name: Upload APK artifact (if produced)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-apk
+          path: build/app/outputs/flutter-apk/*.apk || true
+      - name: Android signing and build (if keystore available)
+        if: secrets.ANDROID_KEYSTORE_BASE64 && secrets.ANDROID_KEYSTORE_PASSWORD && secrets.ANDROID_KEY_ALIAS
+        run: |
+          echo "Decoding keystore..."
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/keystore.jks
+          flutter build apk --release
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
