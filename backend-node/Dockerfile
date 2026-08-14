@@ -17,6 +17,7 @@ RUN npm run build
 FROM node:20-alpine
 WORKDIR /app
 ENV NODE_ENV=production
+ENV NODE_OPTIONS=""
 
 # Install only runtime dependencies for native modules
 RUN apk add --no-cache cairo jpeg pango giflib pixman

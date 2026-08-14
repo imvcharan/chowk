@@ -5,11 +5,13 @@ services:
     region: ohio
     plan: starter
     branch: main
-    buildCommand: npm ci && npx prisma generate && npm run build
-    startCommand: npm start
+    buildCommand: npm ci --legacy-peer-deps && npx prisma generate && npm run build
+    startCommand: node dist/main.js
     envVars:
       - key: NODE_ENV
         value: production
+      - key: NODE_OPTIONS
+        value: ""
       - key: PORT
         value: 3000
       - key: DATABASE_URL
