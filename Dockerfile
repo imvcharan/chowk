@@ -1,31 +1,22 @@
-FROM node:20-alpine
+FROM node:18-alpine
 
-# Fresh build - no cache
 WORKDIR /app
 
-# Install build dependencies
-RUN apk add --no-cache python3 make g++ cairo-dev jpeg-dev pango-dev giflib-dev pixman-dev
+RUN apk add --no-cache python3 make g++
 
-# Copy npm config
-COPY .npmrc ./
-COPY backend-node/.npmrc ./
-
-# Copy backend code
 COPY backend-node/package*.json ./
+
+RUN npm install --no-audit --no-fund --legacy-peer-deps 2>&1 | grep -v "npm warn" || true
+
 COPY backend-node/prisma ./prisma
+RUN npx prisma generate
+
 COPY backend-node/tsconfig.json backend-node/nest-cli.json ./
 COPY backend-node/src ./src
 
-# Install dependencies with force flag
-RUN npm install --force && npm cache clean --force
-
-# Generate Prisma
-RUN npx prisma generate
-
-# Build app
 RUN npm run build
 
-ENV NODE_ENV=production
 EXPOSE 3000
+ENV NODE_ENV=production
 
 CMD ["node", "dist/main.js"]
