@@ -1,34 +1,29 @@
-FROM node:20-alpine AS build
+FROM node:20-alpine
+
 WORKDIR /app
 
-# Install build dependencies for native modules
+# Install build dependencies
 RUN apk add --no-cache python3 make g++ cairo-dev jpeg-dev pango-dev giflib-dev pixman-dev
 
+# Copy backend code
 COPY backend-node/package*.json ./
-RUN npm install --legacy-peer-deps
-
 COPY backend-node/prisma ./prisma
-RUN npx prisma generate
-
 COPY backend-node/tsconfig.json backend-node/nest-cli.json ./
 COPY backend-node/src ./src
+
+# Install dependencies
+RUN npm install --legacy-peer-deps
+
+# Generate Prisma
+RUN npx prisma generate
+
+# Build app
 RUN npm run build
 
-FROM node:20-alpine
-WORKDIR /app
+# Remove dev dependencies
+RUN npm prune --omit=dev
+
 ENV NODE_ENV=production
-ENV NODE_OPTIONS=""
-
-# Install only runtime dependencies for native modules
-RUN apk add --no-cache cairo jpeg pango giflib pixman
-
-COPY backend-node/package*.json ./
-RUN npm install --legacy-peer-deps --omit=dev && npm cache clean --force
-
-COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=build /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=build /app/dist ./dist
-COPY backend-node/prisma ./prisma
-
 EXPOSE 3000
+
 CMD ["node", "dist/main.js"]
