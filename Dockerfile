@@ -4,9 +4,9 @@ WORKDIR /app
 
 RUN apk add --no-cache python3 make g++
 
-COPY backend-node/package*.json ./
+COPY backend-node/package.json backend-node/package-lock.json ./
 
-RUN npm ci --legacy-peer-deps --no-audit --no-fund
+RUN npm install
 
 COPY backend-node/prisma ./prisma
 RUN npx prisma generate
