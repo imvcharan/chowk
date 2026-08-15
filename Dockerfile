@@ -5,7 +5,7 @@ WORKDIR /app
 RUN apk add --no-cache python3 make g++ cairo-dev jpeg-dev pango-dev giflib-dev pixman-dev
 
 COPY backend-node/package*.json ./
-RUN npm ci --legacy-peer-deps
+RUN npm install --legacy-peer-deps
 
 COPY backend-node/prisma ./prisma
 RUN npx prisma generate
@@ -23,7 +23,7 @@ ENV NODE_OPTIONS=""
 RUN apk add --no-cache cairo jpeg pango giflib pixman
 
 COPY backend-node/package*.json ./
-RUN npm ci --legacy-peer-deps --only=production && npm cache clean --force
+RUN npm install --legacy-peer-deps --omit=dev && npm cache clean --force
 
 COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=build /app/node_modules/@prisma ./node_modules/@prisma
