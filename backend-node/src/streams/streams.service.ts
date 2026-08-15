@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { LiveStream, Prisma, StreamStatus } from '@prisma/client';
+import { Prisma, type LiveStream, StreamStatus } from '@prisma/client';
 import { createHash, randomBytes } from 'node:crypto';
 import { PrismaService } from '../database/prisma.service';
 import { CreateStreamDto } from './dto/create-stream.dto';
@@ -27,7 +27,7 @@ export class StreamsService {
       orderBy: { createdAt: 'desc' },
       take: 50,
     });
-    return streams.map((stream) => this.toResponse(stream));
+    return streams.map((stream: LiveStream) => this.toResponse(stream));
   }
 
   async create(dto: CreateStreamDto, startedById: number): Promise<StreamResponse> {
@@ -62,7 +62,7 @@ export class StreamsService {
         data: { status: dto.status, ...timestamp },
       });
       return this.toResponse(stream);
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
         throw new NotFoundException('Stream not found or not owned by the current user');
       }

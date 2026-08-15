@@ -17,7 +17,7 @@ export class NewsService {
       this.prisma.article.findMany({ where, include: { category: true, author: true, image: true }, orderBy: { createdAt: 'desc' }, skip: (page - 1) * limit, take: limit }),
       this.prisma.article.count({ where }),
     ]);
-    return { success: true, data: articles.map((article) => this.present(article)), pagination: { page, limit, total, pages: Math.max(1, Math.ceil(total / limit)) } };
+    return { success: true, data: articles.map((article: any) => this.present(article)), pagination: { page, limit, total, pages: Math.max(1, Math.ceil(total / limit)) } };
   }
 
   async search(query: string) {
@@ -27,7 +27,7 @@ export class NewsService {
       orderBy: { createdAt: 'desc' },
       take: 50,
     });
-    return { success: true, data: articles.map((article) => this.present(article)) };
+    return { success: true, data: articles.map((article: any) => this.present(article)) };
   }
 
   async trending(limit: number) {
@@ -38,7 +38,7 @@ export class NewsService {
       orderBy: [{ viewsCount: 'desc' }, { createdAt: 'desc' }],
       take: limit,
     });
-    return { success: true, data: articles.map((article) => this.present(article)) };
+    return { success: true, data: articles.map((article: any) => this.present(article)) };
   }
 
   async detail(id: number) {

@@ -113,7 +113,7 @@ export class AdminService {
     return `${prefix}${id.toString().padStart(5, '0')}`;
   }
 
-  categories() { return this.prisma.category.findMany({ orderBy: { name: 'asc' } }).then((data) => ({ success: true, data })); }
+  categories() { return this.prisma.category.findMany({ orderBy: { name: 'asc' } }).then((data: any) => ({ success: true, data })); }
   async createCategory(body: { name?: string; slug?: string }) { if (!body.name?.trim() || !body.slug?.trim()) throw new BadRequestException('Name and slug are required'); const data = await this.prisma.category.create({ data: { name: body.name.trim(), slug: body.slug.trim() } }); return { success: true, data }; }
   async updateCategory(id: number, body: { name?: string; slug?: string }) { if (!body.name?.trim() || !body.slug?.trim()) throw new BadRequestException('Name and slug are required'); try { const data = await this.prisma.category.update({ where: { id }, data: { name: body.name.trim(), slug: body.slug.trim() } }); return { success: true, data }; } catch { throw new NotFoundException('Category not found'); } }
   async deleteCategory(id: number) { try { await this.prisma.category.delete({ where: { id } }); return { success: true }; } catch { throw new NotFoundException('Category not found'); } }

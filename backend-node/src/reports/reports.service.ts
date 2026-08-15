@@ -13,6 +13,6 @@ export class ReportsService {
 
   async list() {
     const reports = await this.prisma.report.findMany({ include: { user: true, article: true }, orderBy: { createdAt: 'desc' } });
-    return { success: true, data: reports.map((r) => ({ id: r.id, news_id: r.articleId, user_id: r.userId, reported_by: r.user.name, reason: r.reason, details: r.details, created_at: r.createdAt, news_title: r.article.title })) };
+    return { success: true, data: reports.map((r: any) => ({ id: r.id, news_id: r.articleId, user_id: r.userId, reported_by: r.user.name, reason: r.reason, details: r.details, created_at: r.createdAt, news_title: r.article.title })) };
   }
 }

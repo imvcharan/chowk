@@ -7,7 +7,7 @@ export class SocialService {
 
   async bookmarks(userId: number, page: number, limit: number) {
     const items = await this.prisma.bookmark.findMany({ where: { userId }, include: { article: { include: { category: true, author: true, image: true } } }, orderBy: { createdAt: 'desc' }, skip: (page - 1) * limit, take: limit });
-    return { success: true, data: items.map((item) => ({ ...item.article, description: item.article.excerpt, category_name: item.article.category?.name, author_name: item.article.author?.name, image_url: item.article.image?.url, bookmarked_at: item.createdAt })) };
+    return { success: true, data: items.map((item: any) => ({ ...item.article, description: item.article.excerpt, category_name: item.article.category?.name, author_name: item.article.author?.name, image_url: item.article.image?.url, bookmarked_at: item.createdAt })) };
   }
 
   async addBookmark(userId: number, articleId: number) {
@@ -39,7 +39,7 @@ export class SocialService {
 
   async comments(articleId: number, page: number, limit: number) {
     const comments = await this.prisma.comment.findMany({ where: { articleId, isApproved: true }, include: { user: true }, orderBy: { createdAt: 'desc' }, skip: (page - 1) * limit, take: limit });
-    return { success: true, data: comments.map((comment) => ({ id: comment.id, content: comment.content, created_at: comment.createdAt, likes_count: comment.likesCount, user_name: comment.user.name, user_avatar: comment.user.avatarUrl })) };
+    return { success: true, data: comments.map((comment: any) => ({ id: comment.id, content: comment.content, created_at: comment.createdAt, likes_count: comment.likesCount, user_name: comment.user.name, user_avatar: comment.user.avatarUrl })) };
   }
 
   async addComment(userId: number, articleId: number, content: string) {
