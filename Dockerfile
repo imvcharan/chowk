@@ -1,5 +1,6 @@
 FROM node:18-alpine
 
+# Force cache invalidation - 2026-08-15 5:55PM
 WORKDIR /app
 
 RUN apk add --no-cache python3 make g++
