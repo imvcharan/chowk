@@ -6,7 +6,7 @@ RUN apk add --no-cache python3 make g++
 
 COPY backend-node/package*.json ./
 
-RUN npm install --no-audit --no-fund --legacy-peer-deps 2>&1 | grep -v "npm warn" || true
+RUN npm ci --legacy-peer-deps --no-audit --no-fund
 
 COPY backend-node/prisma ./prisma
 RUN npx prisma generate
