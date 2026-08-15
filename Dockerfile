@@ -16,16 +16,13 @@ COPY backend-node/tsconfig.json backend-node/nest-cli.json ./
 COPY backend-node/src ./src
 
 # Install dependencies with force flag
-RUN npm install --force
+RUN npm install --force && npm cache clean --force
 
 # Generate Prisma
 RUN npx prisma generate
 
 # Build app
 RUN npm run build
-
-# Remove dev dependencies
-RUN npm prune --omit=dev --force
 
 ENV NODE_ENV=production
 EXPOSE 3000
