@@ -1,5 +1,6 @@
 FROM node:20-alpine
 
+# Fresh build - no cache
 WORKDIR /app
 
 # Install build dependencies
