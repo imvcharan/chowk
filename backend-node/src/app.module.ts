@@ -18,6 +18,18 @@ import { AdminModule } from './admin/admin.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env.local', '.env'],
+      load: [
+        () => {
+          const env = process.env;
+          const nextEnv: Record<string, string | undefined> = { ...env };
+
+          if (!nextEnv.JWT_ACCESS_SECRET && nextEnv.JWT_SECRET) {
+            nextEnv.JWT_ACCESS_SECRET = nextEnv.JWT_SECRET;
+          }
+
+          return nextEnv;
+        },
+      ],
     }),
     PrismaModule,
     AuthModule,

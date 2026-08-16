@@ -16,6 +16,8 @@ services:
         fromDatabase:
           name: chowk-db
           property: connectionString
+      - key: JWT_ACCESS_SECRET
+        sync: false
       - key: JWT_SECRET
         sync: false
       - key: JWT_EXPIRATION
