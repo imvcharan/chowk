@@ -18,6 +18,7 @@ FROM node:20-alpine
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NODE_OPTIONS=""
+ENV PORT=3000
 
 # Install only runtime dependencies for native modules
 RUN apk add --no-cache cairo jpeg pango giflib pixman

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { resolveRuntimeEnv } from './config/runtime-env';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './database/prisma.module';
 import { HealthController } from './health.controller';
@@ -18,18 +19,7 @@ import { AdminModule } from './admin/admin.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env.local', '.env'],
-      load: [
-        () => {
-          const env = process.env;
-          const nextEnv: Record<string, string | undefined> = { ...env };
-
-          if (!nextEnv.JWT_ACCESS_SECRET && nextEnv.JWT_SECRET) {
-            nextEnv.JWT_ACCESS_SECRET = nextEnv.JWT_SECRET;
-          }
-
-          return nextEnv;
-        },
-      ],
+      load: [() => resolveRuntimeEnv(process.env)],
     }),
     PrismaModule,
     AuthModule,
